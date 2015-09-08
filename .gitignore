@@ -18,4 +18,6 @@ t
 *.svg
 
 *.dot
+vocab*
+mini*
 

@@ -1,4 +1,3 @@
---require 'mobdebug'.start()
 require 'cutorch'
 require 'nn'
 require 'cunn'
@@ -46,8 +45,8 @@ function convert2tensors(sentences)
   return l  
 end
 
-sentences_ru = read_words('filtered_sentences_indexes_ru_rev1')
-sentences_en = read_words('filtered_sentences_indexes_en1')
+sentences_ru = read_words('mini_post_index')
+sentences_en = read_words('mini_comment_index')
 
 function calc_max_sentence_len(sentences)
   local m = 1
@@ -64,14 +63,13 @@ max_sentence_len = math.max(calc_max_sentence_len(sentences_en), calc_max_senten
 
 --print(sentences_ru)
 
-
 print("max_sentence_len ", max_sentence_len)
 
 assert(#sentences_en == #sentences_ru)
 n_data = #sentences_en
 
-vocabulary_ru = table.load('vocabulary_ru')
-vocabulary_en = table.load('vocabulary_en')
+vocabulary_ru = table.load('vocab_dict_post')
+vocabulary_en = table.load('vocab_dict_comment')
 vocab_size = #vocabulary_ru
 assert (#vocabulary_en == #vocabulary_ru)
 
@@ -154,8 +152,7 @@ function gen_batch()
       
     end
   end
-
-  print("max_sentence_len_batch ", max_sentence_len_batch)
+  --print("max_sentence_len_batch ", max_sentence_len_batch)
   batch_ru = t[{{}, {1, max_sentence_len_batch}}]:clone()
   mask_ru = mask[{{1, max_sentence_len_batch},{},{}}]:clone()
   
@@ -279,13 +276,13 @@ function feval(x_arg)
     return loss, grad_params
 end
 
-optim_state = {learningRate = 1e-2}
+optim_state = {learningRate = 1e-3}
 
 
 for i = 1, 2000 do
   local _, loss = optim.adagrad(feval, params, optim_state)
 
-  if i % 30 == 0 then
+  if i % 50 == 0 then
       print(string.format("iteration %4d, loss = %6.6f", i, loss[1]))
       --print(params)
       sample_sentence = {}
@@ -301,7 +298,7 @@ for i = 1, 2000 do
         source_sentence[#source_sentence + 1] = vocabulary_ru[x_enc[1][t]]
      end
       print(table.concat(source_sentence, ' '))
-      print(table.concat(sample_sentence, ' '))
+      --print(table.concat(sample_sentence, ' '))
       print(table.concat(target_sentence, ' '))
       
   end
