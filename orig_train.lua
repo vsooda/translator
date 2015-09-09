@@ -155,7 +155,7 @@ function gen_batch()
     end
   end
 
-  print("max_sentence_len_batch ", max_sentence_len_batch)
+--  print("max_sentence_len_batch ", max_sentence_len_batch)
   batch_ru = t[{{}, {1, max_sentence_len_batch}}]:clone()
   mask_ru = mask[{{1, max_sentence_len_batch},{},{}}]:clone()
   
@@ -282,7 +282,7 @@ end
 optim_state = {learningRate = 1e-2}
 
 
-for i = 1, 2000 do
+for i = 1, 20000 do
   local _, loss = optim.adagrad(feval, params, optim_state)
 
   if i % 30 == 0 then

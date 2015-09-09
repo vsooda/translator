@@ -10,11 +10,11 @@ nngraph.setDebug(true)
 require 'lstm'
 
 opt = {}
-opt.rnn_size = 40
+opt.rnn_size = 120
 opt.n_layers = 2
 rnn_size = opt.rnn_size
 n_layers = opt.n_layers
-batch_size = 2
+batch_size = 10
 
 --train data
 function read_words(fn)
@@ -33,6 +33,7 @@ function read_words(fn)
   return sentences
 end
 
+--lua using pairs to access key,value in table
 function convert2tensors(sentences)
   l = {}
   for _, sentence in pairs(sentences) do
@@ -146,7 +147,7 @@ function gen_batch()
         t[k][i] = sentence[i]
         mask[i][k][k] = 1
       else
-        t[k][i] = vocab_size - 1
+        t[k][i] = vocab_size
         mask[i][k][k] = 0
       end
       
@@ -168,7 +169,7 @@ function gen_batch()
         t[k][i] = sentence[i]
         mask[i][k][k] = 1
       else
-        t[k][i] = vocab_size - 1
+        t[k][i] = vocab_size
         mask[i][k][k] = 0
       end
       
@@ -279,7 +280,7 @@ end
 optim_state = {learningRate = 1e-3}
 
 
-for i = 1, 2000 do
+for i = 1, 200000 do
   local _, loss = optim.adagrad(feval, params, optim_state)
 
   if i % 50 == 0 then
@@ -288,9 +289,11 @@ for i = 1, 2000 do
       sample_sentence = {}
       target_sentence = {}
       source_sentence = {}
+      --print('x_dec size: ', x_dec:size())
+      ----print(x_dec_prediction[1]:size())
+      --print(x_dec_prediction[2]:max(2))
       for t = 1, x_dec:size(2) do 
         _, sampled_index = x_dec_prediction[t]:max(2)
-        --print(sampled_index)
         sample_sentence[#sample_sentence + 1] = vocabulary_en[sampled_index[1][1]]
         target_sentence[#target_sentence + 1] = vocabulary_en[y_dec[1][t]]
      end
@@ -298,7 +301,7 @@ for i = 1, 2000 do
         source_sentence[#source_sentence + 1] = vocabulary_ru[x_enc[1][t]]
      end
       print(table.concat(source_sentence, ' '))
-      --print(table.concat(sample_sentence, ' '))
+      print(table.concat(sample_sentence, ' '))
       print(table.concat(target_sentence, ' '))
       
   end
